@@ -29,11 +29,17 @@ enum ReservationStatus {
   PENDING
   CONFIRMED
   CANCELLED
+  EXPIRED
 }
 
 enum TicketStatus {
   VALID
   USED
+}
+
+enum PaymentStatus {
+  APPROVED
+  DECLINED
 }
 
 model Profile {
@@ -52,15 +58,17 @@ model Profile {
 model Event {
   id             String      @id @default(uuid()) @db.Uuid
   title          String
+  description    String
   place          String
   totalCapacity  Int
   stock          Int
   priceInCents   Int
-  dateBegining   DateTime
-  dateEnding     DateTime
+  date           DateTime
+  imageUrl       String?
   status         EventStatus @default(DRAFT)
   ticketmasterId String      @unique
   createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   organizerId String  @db.Uuid
   organizer   Profile @relation("EventOrganizer", fields: [organizerId], references: [id])
@@ -75,11 +83,13 @@ model Event {
 }
 
 model Reservation {
-  id        String            @id @default(uuid()) @db.Uuid
-  quantity  Int
-  status    ReservationStatus @default(PENDING)
-  createdAt DateTime          @default(now())
-  expiresAt DateTime?
+  id                String            @id @default(uuid()) @db.Uuid
+  quantity          Int
+  unitPriceInCents  Int
+  totalPriceInCents Int
+  status            ReservationStatus @default(PENDING)
+  createdAt         DateTime          @default(now())
+  expiresAt         DateTime?
 
   eventId String @db.Uuid
   event   Event  @relation("EventReservation", fields: [eventId], references: [id])
@@ -88,6 +98,7 @@ model Reservation {
   client   Profile @relation("ClientReservation", fields: [clientId], references: [id])
 
   tickets Ticket[] @relation("ReservationTicket")
+  payment Payment? @relation("ReservationPayment")
 
   @@map("reservations")
 }
@@ -95,6 +106,7 @@ model Reservation {
 model Ticket {
   id        String       @id @default(uuid()) @db.Uuid
   code      String       @unique
+  qrToken   String       @unique
   status    TicketStatus @default(VALID)
   createdAt DateTime     @default(now())
   usedAt    DateTime?
@@ -106,4 +118,16 @@ model Ticket {
   reservation   Reservation @relation("ReservationTicket", fields: [reservationId], references: [id])
 
   @@map("tickets")
+}
+
+model Payment {
+  id            String        @id @default(uuid()) @db.Uuid
+  amountInCents Int
+  status        PaymentStatus
+  createdAt     DateTime      @default(now())
+
+  reservationId String      @unique @db.Uuid
+  reservation   Reservation @relation("ReservationPayment", fields: [reservationId], references: [id])
+
+  @@map("payments")
 }
