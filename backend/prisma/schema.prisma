@@ -25,14 +25,26 @@ enum EventStatus {
   COMPLETED
 }
 
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum TicketStatus {
+  VALID
+  USED
+}
+
 model Profile {
   id        String   @id @db.Uuid
   role      Role
   name      String?
   createdAt DateTime @default(now())
 
-  organizedEvents Event[] @relation("EventOrganizer")
-  gateForEvent    Event?  @relation("EventGate")
+  organizedEvents Event[]       @relation("EventOrganizer")
+  gateForEvent    Event?        @relation("EventGate")
+  reservations    Reservation[] @relation("ClientReservation")
 
   @@map("profiles")
 }
@@ -56,5 +68,42 @@ model Event {
   gateProfileId String?  @unique @db.Uuid
   gateProfile   Profile? @relation("EventGate", fields: [gateProfileId], references: [id])
 
+  reservations Reservation[] @relation("EventReservation")
+  tickets      Ticket[]      @relation("EventTicket")
+
   @@map("events")
+}
+
+model Reservation {
+  id        String            @id @default(uuid()) @db.Uuid
+  quantity  Int
+  status    ReservationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  expiresAt DateTime?
+
+  eventId String @db.Uuid
+  event   Event  @relation("EventReservation", fields: [eventId], references: [id])
+
+  clientId String  @db.Uuid
+  client   Profile @relation("ClientReservation", fields: [clientId], references: [id])
+
+  tickets Ticket[] @relation("ReservationTicket")
+
+  @@map("reservations")
+}
+
+model Ticket {
+  id        String       @id @default(uuid()) @db.Uuid
+  code      String       @unique
+  status    TicketStatus @default(VALID)
+  createdAt DateTime     @default(now())
+  usedAt    DateTime?
+
+  eventId String @db.Uuid
+  event   Event  @relation("EventTicket", fields: [eventId], references: [id])
+
+  reservationId String      @db.Uuid
+  reservation   Reservation @relation("ReservationTicket", fields: [reservationId], references: [id])
+
+  @@map("tickets")
 }
