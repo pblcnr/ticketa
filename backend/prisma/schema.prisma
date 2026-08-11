@@ -18,11 +18,43 @@ enum Role {
   PORTARIA
 }
 
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
 model Profile {
   id        String   @id @db.Uuid
-  role      Role     
+  role      Role
   name      String?
   createdAt DateTime @default(now())
 
+  organizedEvents Event[] @relation("EventOrganizer")
+  gateForEvent    Event?  @relation("EventGate")
+
   @@map("profiles")
+}
+
+model Event {
+  id             String      @id @default(uuid()) @db.Uuid
+  title          String
+  place          String
+  totalCapacity  Int
+  stock          Int
+  priceInCents   Int
+  dateBegining   DateTime
+  dateEnding     DateTime
+  status         EventStatus @default(DRAFT)
+  ticketmasterId String      @unique
+  createdAt      DateTime    @default(now())
+
+  organizerId String  @db.Uuid
+  organizer   Profile @relation("EventOrganizer", fields: [organizerId], references: [id])
+
+  gateProfileId String?  @unique @db.Uuid
+  gateProfile   Profile? @relation("EventGate", fields: [gateProfileId], references: [id])
+
+  @@map("events")
 }
