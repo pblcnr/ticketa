@@ -21,6 +21,17 @@ export interface SignInResult {
   accessToken: string;
 }
 
+export interface AuthenticatedAuthUser {
+  id: string;
+}
+
+export class InvalidAccessTokenError extends Error {
+  constructor() {
+    super('Invalid or expired access token');
+    this.name = 'InvalidAccessTokenError';
+  }
+}
+
 @Injectable()
 export class SupabaseService {
   private readonly adminClient: ReturnType<typeof createClient>;
@@ -99,5 +110,15 @@ export class SupabaseService {
       id: data.user.id,
       accessToken: data.session.access_token,
     };
+  }
+
+  async getUserFromAccessToken(accessToken: string): Promise<AuthenticatedAuthUser> {
+    const { data, error } = await this.publicClient.auth.getUser(accessToken);
+
+    if (error || !data.user) {
+      throw new InvalidAccessTokenError();
+    }
+
+    return { id: data.user.id };
   }
 }
