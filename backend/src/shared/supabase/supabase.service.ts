@@ -11,13 +11,25 @@ export interface CreateAuthUserResult {
   email: string;
 }
 
+export interface SignInInput {
+  email: string;
+  password: string;
+}
+
+export interface SignInResult {
+  id: string;
+  accessToken: string;
+}
+
 @Injectable()
 export class SupabaseService {
-  private readonly client: ReturnType<typeof createClient>;
+  private readonly adminClient: ReturnType<typeof createClient>;
+  private readonly publicClient: ReturnType<typeof createClient>;
 
   constructor() {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       throw new Error(
@@ -25,16 +37,23 @@ export class SupabaseService {
       );
     }
 
-    this.client = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    if (!supabaseAnonKey) {
+      throw new Error('SUPABASE_ANON_KEY environment variable must be set');
+    }
+
+    const clientOptions = {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
-    });
+    };
+
+    this.adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, clientOptions);
+    this.publicClient = createClient(supabaseUrl, supabaseAnonKey, clientOptions);
   }
 
   async createUser(input: CreateAuthUserInput): Promise<CreateAuthUserResult> {
-    const { data, error } = await this.client.auth.admin.createUser({
+    const { data, error } = await this.adminClient.auth.admin.createUser({
       email: input.email,
       password: input.password,
       email_confirm: true,
@@ -55,10 +74,30 @@ export class SupabaseService {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    const { error } = await this.client.auth.admin.deleteUser(userId);
+    const { error } = await this.adminClient.auth.admin.deleteUser(userId);
 
     if (error) {
       throw error;
     }
+  }
+
+  async signInWithPassword(input: SignInInput): Promise<SignInResult> {
+    const { data, error } = await this.publicClient.auth.signInWithPassword({
+      email: input.email,
+      password: input.password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data.user || !data.session) {
+      throw new Error('Supabase Auth did not return a session after sign-in');
+    }
+
+    return {
+      id: data.user.id,
+      accessToken: data.session.access_token,
+    };
   }
 }

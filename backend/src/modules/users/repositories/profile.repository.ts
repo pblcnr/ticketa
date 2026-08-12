@@ -21,4 +21,10 @@ export class ProfileRepository {
       },
     });
   }
+
+  findById(id: string): Promise<Profile | null> {
+    return this.prisma.profile.findUnique({
+      where: { id },
+    });
+  }
 }

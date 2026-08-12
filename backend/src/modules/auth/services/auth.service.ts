@@ -4,16 +4,25 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthError } from '@supabase/supabase-js';
 import { Role } from '../../../../generated/prisma/client';
 import { ProfileRepository } from '../../users/repositories/profile.repository';
 import { SupabaseService } from '../../../shared/supabase/supabase.service';
+import { SigninDto } from '../dto/signin.dto';
 import { SignupDto, SignupRole } from '../dto/signup.dto';
 
 export interface SignupResult {
   id: string;
   email: string;
+  role: Role;
+  name: string | null;
+}
+
+export interface LoginResult {
+  access_token: string;
+  id: string;
   role: Role;
   name: string | null;
 }
@@ -26,6 +35,35 @@ export class AuthService {
     private readonly supabaseService: SupabaseService,
     private readonly profileRepository: ProfileRepository,
   ) {}
+
+  async login(dto: SigninDto): Promise<LoginResult> {
+    try {
+      const authSession = await this.supabaseService.signInWithPassword({
+        email: dto.email,
+        password: dto.password,
+      });
+
+      const profile = await this.profileRepository.findById(authSession.id);
+
+      if (!profile) {
+        this.logger.error(
+          `Usuário autenticado no Supabase Auth sem profile correspondente. UUID: ${authSession.id}`,
+        );
+        throw new InternalServerErrorException(
+          'Conta autenticada, mas perfil não encontrado. Entre em contato com o suporte.',
+        );
+      }
+
+      return {
+        access_token: authSession.accessToken,
+        id: profile.id,
+        role: profile.role,
+        name: profile.name,
+      };
+    } catch (error) {
+      throw this.toLoginHttpException(error);
+    }
+  }
 
   async signup(dto: SignupDto): Promise<SignupResult> {
     this.assertSignupRoleAllowed(dto.role);
@@ -78,6 +116,39 @@ export class AuthService {
         deleteError instanceof Error ? deleteError.stack : String(deleteError),
       );
     }
+  }
+
+  private toLoginHttpException(error: unknown): Error {
+    if (error instanceof InternalServerErrorException || error instanceof UnauthorizedException) {
+      return error;
+    }
+
+    if (this.isAuthError(error)) {
+      return this.mapLoginAuthError(error);
+    }
+
+    if (error instanceof Error) {
+      this.logger.error('Unexpected login error', error.stack);
+    }
+
+    return new InternalServerErrorException('Não foi possível concluir o login.');
+  }
+
+  private mapLoginAuthError(error: AuthError): Error {
+    const message = error.message.toLowerCase();
+
+    if (
+      error.status === 400 ||
+      error.status === 401 ||
+      message.includes('invalid login credentials') ||
+      message.includes('invalid credentials')
+    ) {
+      return new UnauthorizedException('E-mail ou senha inválidos.');
+    }
+
+    this.logger.warn(`Supabase Auth error during login: ${error.message}`);
+
+    return new UnauthorizedException('Não foi possível autenticar com os dados informados.');
   }
 
   private toHttpException(error: unknown): Error {
