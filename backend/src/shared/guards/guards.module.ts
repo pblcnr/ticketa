@@ -6,6 +6,6 @@ import { RolesGuard } from './roles.guard';
 @Module({
   imports: [SupabaseModule, UsersModule],
   providers: [RolesGuard],
-  exports: [RolesGuard],
+  exports: [RolesGuard, SupabaseModule, UsersModule],
 })
 export class GuardsModule {}
