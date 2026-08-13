@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Event, EventStatus, Prisma } from '../../../../generated/prisma/client';
 import { PrismaService } from '../../../shared/database/prisma.service';
 
+type EventDbClient = Pick<PrismaService, 'event'>;
+
 export interface CreateEventInput {
   title: string;
   description: string;
@@ -117,6 +119,28 @@ export class EventRepository {
     return this.prisma.event.update({
       where: { id },
       data: { status: EventStatus.PUBLISHED },
+    });
+  }
+
+  decrementStockIfAvailable(
+    eventId: string,
+    quantity: number,
+    db: EventDbClient = this.prisma,
+  ): Promise<Prisma.BatchPayload> {
+    return db.event.updateMany({
+      where: { id: eventId, stock: { gte: quantity } },
+      data: { stock: { decrement: quantity } },
+    });
+  }
+
+  incrementStock(
+    eventId: string,
+    quantity: number,
+    db: EventDbClient = this.prisma,
+  ): Promise<Event> {
+    return db.event.update({
+      where: { id: eventId },
+      data: { stock: { increment: quantity } },
     });
   }
 }

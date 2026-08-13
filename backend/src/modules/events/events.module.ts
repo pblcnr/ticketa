@@ -8,5 +8,6 @@ import { EventsService } from './services/events.service';
   imports: [GuardsModule],
   controllers: [EventsController],
   providers: [EventsService, EventRepository],
+  exports: [EventRepository],
 })
 export class EventsModule {}
