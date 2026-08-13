@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common';
+import { GuardsModule } from '../../shared/guards/guards.module';
+import { EventsController } from './controllers/events.controller';
+import { EventRepository } from './repositories/event.repository';
+import { EventsService } from './services/events.service';
+
+@Module({
+  imports: [GuardsModule],
+  controllers: [EventsController],
+  providers: [EventsService, EventRepository],
+})
+export class EventsModule {}

@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from '../../modules/users/users.module';
 import { SupabaseModule } from '../supabase/supabase.module';
+import { OptionalAuthGuard } from './optional-auth.guard';
 import { RolesGuard } from './roles.guard';
 
 @Module({
   imports: [SupabaseModule, UsersModule],
-  providers: [RolesGuard],
-  exports: [RolesGuard, SupabaseModule, UsersModule],
+  providers: [RolesGuard, OptionalAuthGuard],
+  exports: [RolesGuard, OptionalAuthGuard, SupabaseModule, UsersModule],
 })
 export class GuardsModule {}
