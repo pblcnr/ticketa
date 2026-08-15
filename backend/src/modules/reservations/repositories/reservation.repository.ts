@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   Payment,
   PaymentStatus,
+  Prisma,
   Reservation,
   ReservationStatus,
   Ticket,
@@ -82,6 +83,17 @@ export class ReservationRepository {
   ): Promise<Reservation> {
     return db.reservation.update({
       where: { id },
+      data: { status },
+    });
+  }
+
+  updateStatusIfPending(
+    id: string,
+    status: ReservationStatus,
+    db: ReservationDbClient = this.prisma,
+  ): Promise<Prisma.BatchPayload> {
+    return db.reservation.updateMany({
+      where: { id, status: ReservationStatus.PENDING },
       data: { status },
     });
   }

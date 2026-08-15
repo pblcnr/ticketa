@@ -3,6 +3,8 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -29,6 +31,8 @@ const MAX_TICKET_GENERATION_ATTEMPTS = 5;
 
 @Injectable()
 export class ReservationsService {
+  private readonly logger = new Logger(ReservationsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventRepository: EventRepository,
@@ -75,7 +79,8 @@ export class ReservationsService {
         await this.reservationRepository.findByIdWithRelationsInTransaction(reservation.id, tx);
 
       if (!reservationWithRelations) {
-        throw new Error('Reserva criada não encontrada após criação.');
+        this.logger.error(`Reservation ${reservation.id} not found immediately after creation`);
+        throw new InternalServerErrorException('Não foi possível concluir a reserva.');
       }
 
       return reservationWithRelations;
@@ -97,14 +102,24 @@ export class ReservationsService {
       throw new ForbiddenException('Você não tem permissão para pagar esta reserva.');
     }
 
-    if (reservation.status !== ReservationStatus.PENDING) {
-      throw new ConflictException('Esta reserva não está pendente de pagamento.');
-    }
-
     const paymentStatus =
       dto.outcome === PaymentOutcome.APPROVED ? PaymentStatus.APPROVED : PaymentStatus.DECLINED;
+    const reservationStatus =
+      dto.outcome === PaymentOutcome.APPROVED
+        ? ReservationStatus.CONFIRMED
+        : ReservationStatus.CANCELLED;
 
     return this.prisma.$transaction(async (tx) => {
+      const statusUpdateResult = await this.reservationRepository.updateStatusIfPending(
+        reservation.id,
+        reservationStatus,
+        tx,
+      );
+
+      if (statusUpdateResult.count === 0) {
+        throw new ConflictException('Esta reserva não está pendente de pagamento.');
+      }
+
       await this.reservationRepository.createPayment(
         {
           reservationId: reservation.id,
@@ -115,11 +130,6 @@ export class ReservationsService {
       );
 
       if (dto.outcome === PaymentOutcome.APPROVED) {
-        await this.reservationRepository.updateStatus(
-          reservation.id,
-          ReservationStatus.CONFIRMED,
-          tx,
-        );
         await this.createTicketsForReservation(
           reservation.id,
           reservation.eventId,
@@ -127,11 +137,6 @@ export class ReservationsService {
           tx,
         );
       } else {
-        await this.reservationRepository.updateStatus(
-          reservation.id,
-          ReservationStatus.CANCELLED,
-          tx,
-        );
         await this.eventRepository.incrementStock(reservation.eventId, reservation.quantity, tx);
       }
 
@@ -139,7 +144,8 @@ export class ReservationsService {
         await this.reservationRepository.findByIdWithRelationsInTransaction(reservation.id, tx);
 
       if (!updatedReservation) {
-        throw new Error('Reserva não encontrada após pagamento.');
+        this.logger.error(`Reservation ${reservation.id} not found after payment processing`);
+        throw new InternalServerErrorException('Não foi possível concluir o pagamento.');
       }
 
       return updatedReservation;
