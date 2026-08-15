@@ -8,7 +8,6 @@ import {
   signupSchema,
   type SignupFormData,
 } from '../schemas/signup.schema'
-import type { UserRole } from '../types'
 import { getSignupErrorMessage } from '../utils/error-message'
 
 const roleOptions = [
@@ -38,7 +37,7 @@ export function SignupPage() {
 
   const selectedRole = watch('role')
 
-  function handleRoleChange(role: UserRole) {
+  function handleRoleChange(role: SignupFormData['role']) {
     setValue('role', role, { shouldValidate: true })
   }
 

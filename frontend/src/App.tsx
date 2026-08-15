@@ -9,6 +9,7 @@ import { OrganizerEventDetailPage } from './features/events/pages/OrganizerEvent
 import { OrganizerEventFormPage } from './features/events/pages/OrganizerEventFormPage'
 import { OrganizerEventSearchPage } from './features/events/pages/OrganizerEventSearchPage'
 import { OrganizerEventsListPage } from './features/events/pages/OrganizerEventsListPage'
+import { GateValidatePage } from './features/gate/pages/GateValidatePage'
 import { AuthenticatedLayout } from './shared/components/AuthenticatedLayout'
 
 function RootRedirect() {
@@ -45,6 +46,10 @@ function AppRoutes() {
             path="/organizer/events/:id/edit"
             element={<OrganizerEventFormPage />}
           />
+        </Route>
+
+        <Route element={<RequireAuth allowedRoles={['PORTARIA']} />}>
+          <Route path="/gate/validate" element={<GateValidatePage />} />
         </Route>
       </Route>
     </Routes>

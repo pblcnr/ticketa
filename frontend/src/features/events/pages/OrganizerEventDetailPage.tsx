@@ -11,6 +11,7 @@ import {
 import { PerforatedDivider } from '../../../shared/components/PerforatedDivider'
 import { PageContainer } from '../../../shared/components/PageContainer'
 import { StatusBadge } from '../../../shared/components/StatusBadge'
+import { EventGateSection } from '../components/EventGateSection'
 
 export function OrganizerEventDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -193,6 +194,16 @@ export function OrganizerEventDetailPage() {
                 ) : null}
               </div>
             ) : null}
+
+            <EventGateSection
+              eventId={event.id}
+              gateProfileId={event.gateProfileId}
+              onGateLinked={(gateProfileId) =>
+                setEvent((current) =>
+                  current ? { ...current, gateProfileId } : current,
+                )
+              }
+            />
           </article>
         ) : null}
       </PageContainer>

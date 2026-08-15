@@ -88,3 +88,18 @@ export function getPublishEventErrorMessage(error: unknown): string {
 
   return 'Não foi possível publicar o evento. Tente novamente.'
 }
+
+export function getCreateGateUserErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.status === 409) {
+      return 'Este evento já possui uma portaria vinculada.'
+    }
+
+    return (
+      extractMessage(error.body) ??
+      'Não foi possível credenciar a portaria. Tente novamente.'
+    )
+  }
+
+  return 'Não foi possível credenciar a portaria. Tente novamente.'
+}

@@ -5,5 +5,9 @@ export function getPostLoginRoute(role: UserRole): string {
     return '/organizer/events'
   }
 
+  if (role === 'PORTARIA') {
+    return '/gate/validate'
+  }
+
   return '/dashboard'
 }

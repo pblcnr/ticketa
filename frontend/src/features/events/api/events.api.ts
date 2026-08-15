@@ -2,6 +2,8 @@ import { apiRequest } from '../../../shared/api/client'
 import type {
   CatalogItem,
   CreateEventPayload,
+  CreateGateUserPayload,
+  CreateGateUserResult,
   Event,
   UpdateEventPayload,
 } from '../types'
@@ -55,5 +57,15 @@ export function updateEvent(
 export function publishEvent(id: string): Promise<Event> {
   return apiRequest<Event>(`/events/${id}/publish`, {
     method: 'POST',
+  })
+}
+
+export function createGateUser(
+  eventId: string,
+  data: CreateGateUserPayload,
+): Promise<CreateGateUserResult> {
+  return apiRequest<CreateGateUserResult>(`/events/${eventId}/gate`, {
+    method: 'POST',
+    body: JSON.stringify(data),
   })
 }

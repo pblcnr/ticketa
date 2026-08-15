@@ -21,8 +21,24 @@ export type Event = {
   status: EventStatus
   ticketmasterId: string
   organizerId: string
+  gateProfileId: string | null
   createdAt: string
   updatedAt: string
+}
+
+export type CreateGateUserPayload = {
+  email: string
+  password: string
+  name?: string
+}
+
+export type CreateGateUserResult = {
+  profile: {
+    id: string
+    role: string
+    name: string | null
+  }
+  eventId: string
 }
 
 export type CreateEventPayload = {

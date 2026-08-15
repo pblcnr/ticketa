@@ -1,4 +1,4 @@
-export type UserRole = 'ORGANIZADOR' | 'CLIENTE'
+export type UserRole = 'ORGANIZADOR' | 'CLIENTE' | 'PORTARIA'
 
 export type AuthUser = {
   id: string
