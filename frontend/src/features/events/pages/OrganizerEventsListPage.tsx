@@ -6,6 +6,7 @@ import type { Event } from '../types'
 import { formatEventDate } from '../utils/format'
 import { getEventsListErrorMessage } from '../utils/error-message'
 import { StatusBadge } from '../../../shared/components/StatusBadge'
+import { PageContainer } from '../../../shared/components/PageContainer'
 
 export function OrganizerEventsListPage() {
   const { user } = useAuth()
@@ -50,8 +51,8 @@ export function OrganizerEventsListPage() {
   }, [user])
 
   return (
-    <main className="min-h-screen bg-kraft p-6">
-      <div className="mx-auto w-full max-w-3xl">
+    <main className="py-6">
+      <PageContainer>
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-4xl uppercase tracking-wide text-ink">
@@ -63,7 +64,7 @@ export function OrganizerEventsListPage() {
           </div>
           <Link
             to="/organizer/events/new"
-            className="bg-stub-red px-4 py-2.5 font-body text-sm uppercase tracking-widest text-paper transition-opacity hover:opacity-90"
+            className="cursor-pointer bg-stub-red px-4 py-2.5 font-body text-sm uppercase tracking-widest text-paper transition-opacity hover:opacity-90"
           >
             Criar evento
           </Link>
@@ -107,7 +108,7 @@ export function OrganizerEventsListPage() {
             </li>
           ))}
         </ul>
-      </div>
+      </PageContainer>
     </main>
   )
 }

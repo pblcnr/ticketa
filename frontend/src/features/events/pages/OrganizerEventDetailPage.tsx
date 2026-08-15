@@ -9,6 +9,7 @@ import {
   getPublishEventErrorMessage,
 } from '../utils/error-message'
 import { PerforatedDivider } from '../../../shared/components/PerforatedDivider'
+import { PageContainer } from '../../../shared/components/PageContainer'
 import { StatusBadge } from '../../../shared/components/StatusBadge'
 
 export function OrganizerEventDetailPage() {
@@ -86,8 +87,8 @@ export function OrganizerEventDetailPage() {
   const canPublish = isOwner && event?.status === 'DRAFT'
 
   return (
-    <main className="min-h-screen bg-kraft p-6">
-      <div className="mx-auto w-full max-w-2xl">
+    <main className="py-6">
+      <PageContainer>
         <Link
           to="/organizer/events"
           className="font-body text-sm text-stage-violet underline-offset-2 hover:underline"
@@ -194,7 +195,7 @@ export function OrganizerEventDetailPage() {
             ) : null}
           </article>
         ) : null}
-      </div>
+      </PageContainer>
     </main>
   )
 }

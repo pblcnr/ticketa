@@ -5,6 +5,7 @@ import type { CatalogItem } from '../types'
 import { formatEventDate } from '../utils/format'
 import { getCatalogSearchErrorMessage } from '../utils/error-message'
 import { PerforatedDivider } from '../../../shared/components/PerforatedDivider'
+import { PageContainer } from '../../../shared/components/PageContainer'
 
 export function OrganizerEventSearchPage() {
   const navigate = useNavigate()
@@ -38,8 +39,8 @@ export function OrganizerEventSearchPage() {
   }
 
   return (
-    <main className="min-h-screen bg-kraft p-6">
-      <div className="mx-auto w-full max-w-3xl">
+    <main className="py-6">
+      <PageContainer>
         <Link
           to="/organizer/events"
           className="font-body text-sm text-stage-violet underline-offset-2 hover:underline"
@@ -117,7 +118,7 @@ export function OrganizerEventSearchPage() {
             ))}
           </ul>
         </article>
-      </div>
+      </PageContainer>
     </main>
   )
 }

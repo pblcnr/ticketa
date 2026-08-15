@@ -18,6 +18,7 @@ import {
   getUpdateEventErrorMessage,
 } from '../utils/error-message'
 import { PerforatedDivider } from '../../../shared/components/PerforatedDivider'
+import { PageContainer } from '../../../shared/components/PageContainer'
 
 const inputClassName =
   'w-full border border-perf-grey bg-kraft/30 px-3 py-2 font-body text-ink outline-none focus:border-stage-violet'
@@ -157,8 +158,8 @@ export function OrganizerEventFormPage() {
     : '/organizer/events/new'
 
   return (
-    <main className="min-h-screen bg-kraft p-6">
-      <div className="mx-auto w-full max-w-2xl">
+    <main className="py-6">
+      <PageContainer>
         <Link
           to={backLink}
           className="font-body text-sm text-stage-violet underline-offset-2 hover:underline"
@@ -343,7 +344,7 @@ export function OrganizerEventFormPage() {
             </p>
           ) : null}
         </article>
-      </div>
+      </PageContainer>
     </main>
   )
 }

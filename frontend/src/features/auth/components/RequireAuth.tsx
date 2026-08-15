@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import type { UserRole } from '../types'
 
 type RequireAuthProps = {
-  children: ReactNode
+  children?: ReactNode
   allowedRoles?: UserRole[]
 }
 
@@ -20,5 +20,9 @@ export function RequireAuth({ children, allowedRoles }: RequireAuthProps) {
     return <Navigate to="/dashboard" replace />
   }
 
-  return children
+  if (children) {
+    return children
+  }
+
+  return <Outlet />
 }
