@@ -9,5 +9,9 @@ export function getPostLoginRoute(role: UserRole): string {
     return '/gate/validate'
   }
 
+  if (role === 'CLIENTE') {
+    return '/events'
+  }
+
   return '/dashboard'
 }

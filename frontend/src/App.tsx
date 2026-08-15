@@ -9,6 +9,8 @@ import { OrganizerEventDetailPage } from './features/events/pages/OrganizerEvent
 import { OrganizerEventFormPage } from './features/events/pages/OrganizerEventFormPage'
 import { OrganizerEventSearchPage } from './features/events/pages/OrganizerEventSearchPage'
 import { OrganizerEventsListPage } from './features/events/pages/OrganizerEventsListPage'
+import { EventDetailPage } from './features/catalog-browse/pages/EventDetailPage'
+import { EventsListPage } from './features/catalog-browse/pages/EventsListPage'
 import { GateValidatePage } from './features/gate/pages/GateValidatePage'
 import { AuthenticatedLayout } from './shared/components/AuthenticatedLayout'
 
@@ -30,6 +32,9 @@ function AppRoutes() {
       <Route path="/signup" element={<SignupPage />} />
 
       <Route element={<AuthenticatedLayout />}>
+        <Route path="/events" element={<EventsListPage />} />
+        <Route path="/events/:id" element={<EventDetailPage />} />
+
         <Route element={<RequireAuth />}>
           <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
