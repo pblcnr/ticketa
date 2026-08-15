@@ -7,6 +7,7 @@ import { loginRequest } from '../api/auth.api'
 import { useAuth } from '../context/AuthContext'
 import { loginSchema, type LoginFormData } from '../schemas/login.schema'
 import { getLoginErrorMessage } from '../utils/error-message'
+import { getPostLoginRoute } from '../utils/post-auth-route'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -34,7 +35,7 @@ export function LoginPage() {
     try {
       const response = await loginRequest(data)
       login(response)
-      navigate('/dashboard', { replace: true })
+      navigate(getPostLoginRoute(response.role), { replace: true })
     } catch (error) {
       setSubmitError(getLoginErrorMessage(error))
     }
