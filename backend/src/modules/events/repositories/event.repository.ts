@@ -143,4 +143,21 @@ export class EventRepository {
       data: { stock: { increment: quantity } },
     });
   }
+
+  findByGateProfileId(gateProfileId: string): Promise<Event | null> {
+    return this.prisma.event.findUnique({
+      where: { gateProfileId },
+    });
+  }
+
+  setGateProfileIdIfEmpty(
+    eventId: string,
+    gateProfileId: string,
+    db: EventDbClient = this.prisma,
+  ): Promise<Prisma.BatchPayload> {
+    return db.event.updateMany({
+      where: { id: eventId, gateProfileId: null },
+      data: { gateProfileId },
+    });
+  }
 }

@@ -6,8 +6,9 @@ import { OptionalAuthGuard } from '../../../shared/guards/optional-auth.guard';
 import { RolesGuard } from '../../../shared/guards/roles.guard';
 import { AuthenticatedUser } from '../../../shared/types/authenticated-user';
 import { CreateEventDto } from '../dto/create-event.dto';
+import { CreateGateUserDto } from '../dto/create-gate-user.dto';
 import { UpdateEventDto } from '../dto/update-event.dto';
-import { EventsService } from '../services/events.service';
+import { CreateGateUserResult, EventsService } from '../services/events.service';
 
 type RequestWithOptionalUser = Request & { user: AuthenticatedUser | null };
 type RequestWithUser = Request & { user: AuthenticatedUser };
@@ -34,6 +35,17 @@ export class EventsController {
   @Roles(Role.ORGANIZADOR)
   publish(@Param('id') id: string, @Req() req: RequestWithUser): Promise<Event> {
     return this.eventsService.publishEvent(id, req.user);
+  }
+
+  @Post(':id/gate')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ORGANIZADOR)
+  createGateUser(
+    @Param('id') id: string,
+    @Body() dto: CreateGateUserDto,
+    @Req() req: RequestWithUser,
+  ): Promise<CreateGateUserResult> {
+    return this.eventsService.createGateUser(id, dto, req.user);
   }
 
   @Get(':id')

@@ -27,4 +27,10 @@ export class ProfileRepository {
       where: { id },
     });
   }
+
+  deleteById(id: string): Promise<Profile> {
+    return this.prisma.profile.delete({
+      where: { id },
+    });
+  }
 }
