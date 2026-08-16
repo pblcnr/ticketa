@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../features/auth/context/AuthContext'
+import { HeaderSearch } from './HeaderSearch'
 import { PageContainer } from './PageContainer'
 import { PerforatedDivider } from './PerforatedDivider'
 
@@ -63,13 +64,16 @@ export function AppHeader() {
             <span className="text-paper/70"> · {formatRoleLabel(user.role)}</span>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="bg-stub-red px-3 py-1.5 font-body text-xs uppercase tracking-widest text-paper transition-opacity hover:opacity-90"
-        >
-          Sair
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <HeaderSearch />
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="bg-stub-red px-3 py-1.5 font-body text-xs uppercase tracking-widest text-paper transition-opacity hover:opacity-90"
+          >
+            Sair
+          </button>
+        </div>
       </PageContainer>
       <PerforatedDivider notchColor="bg-kraft" />
     </header>

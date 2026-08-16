@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { HeaderSearch } from './HeaderSearch'
 import { PageContainer } from './PageContainer'
 import { PerforatedDivider } from './PerforatedDivider'
 
@@ -13,6 +14,7 @@ export function PublicHeader() {
           Ticketa
         </Link>
         <div className="flex flex-wrap items-center gap-3 font-body text-sm">
+          <HeaderSearch />
           <Link
             to="/login"
             className="text-paper/90 underline-offset-2 hover:underline"

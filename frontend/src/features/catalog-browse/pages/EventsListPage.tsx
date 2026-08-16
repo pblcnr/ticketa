@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { listPublicEvents } from '../api/public-events.api'
 import type { Event } from '../../events/types'
 import {
@@ -7,6 +7,7 @@ import {
   formatPriceInCents,
 } from '../../events/utils/format'
 import { getEventsListErrorMessage } from '../../events/utils/error-message'
+import { filterEvents } from '../utils/filter-events'
 import { PageContainer } from '../../../shared/components/PageContainer'
 
 function formatAvailability(stock: number): string {
@@ -22,9 +23,18 @@ function formatAvailability(stock: number): string {
 }
 
 export function EventsListPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [events, setEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const query = searchParams.get('q') ?? ''
+  const availableOnly = searchParams.get('available') === 'true'
+
+  const filteredEvents = useMemo(
+    () => filterEvents(events, { query, availableOnly }),
+    [events, query, availableOnly],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -37,11 +47,7 @@ export function EventsListPage() {
         const data = await listPublicEvents()
 
         if (!cancelled) {
-          setEvents(
-            data.sort(
-              (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-            ),
-          )
+          setEvents(data)
         }
       } catch (error) {
         if (!cancelled) {
@@ -61,6 +67,27 @@ export function EventsListPage() {
     }
   }, [])
 
+  function handleAvailableOnlyChange(checked: boolean) {
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+
+        if (checked) {
+          next.set('available', 'true')
+        } else {
+          next.delete('available')
+        }
+
+        return next
+      },
+      { replace: true },
+    )
+  }
+
+  const hasActiveFilters = query.trim().length > 0 || availableOnly
+  const showNoFilterResults =
+    !isLoading && !errorMessage && events.length > 0 && filteredEvents.length === 0
+
   return (
     <main className="py-6">
       <PageContainer>
@@ -72,6 +99,22 @@ export function EventsListPage() {
             Confira os eventos disponíveis para reserva
           </p>
         </header>
+
+        {!isLoading && !errorMessage ? (
+          <div className="mb-6">
+            <label className="flex items-center gap-2 font-body text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={availableOnly}
+                onChange={(event) =>
+                  handleAvailableOnlyChange(event.target.checked)
+                }
+                className="h-4 w-4 accent-stage-violet"
+              />
+              Somente com ingressos disponíveis
+            </label>
+          </div>
+        ) : null}
 
         {isLoading ? (
           <p className="font-body text-ink/70">Carregando eventos…</p>
@@ -91,9 +134,28 @@ export function EventsListPage() {
           </article>
         ) : null}
 
-        {!isLoading && !errorMessage && events.length > 0 ? (
+        {showNoFilterResults ? (
+          <article className="bg-paper px-6 py-8 shadow-sm">
+            <p className="font-body text-ink/70">
+              Nenhum evento encontrado para essa busca.
+            </p>
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchParams({}, { replace: true })
+                }}
+                className="mt-3 font-body text-sm text-stage-violet underline-offset-2 hover:underline"
+              >
+                Limpar filtros
+              </button>
+            ) : null}
+          </article>
+        ) : null}
+
+        {!isLoading && !errorMessage && filteredEvents.length > 0 ? (
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
+            {filteredEvents.map((event) => (
               <li key={event.id}>
                 <Link
                   to={`/events/${event.id}`}
