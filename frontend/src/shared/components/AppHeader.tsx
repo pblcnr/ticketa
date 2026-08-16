@@ -50,6 +50,14 @@ export function AppHeader() {
           >
             Eventos
           </Link>
+          {user.role === 'CLIENTE' ? (
+            <Link
+              to="/tickets"
+              className="font-body text-sm text-paper/90 underline-offset-2 hover:underline"
+            >
+              Meus Ingressos
+            </Link>
+          ) : null}
           <div className="font-body text-sm">
             <span className="font-medium">{displayName}</span>
             <span className="text-paper/70"> · {formatRoleLabel(user.role)}</span>

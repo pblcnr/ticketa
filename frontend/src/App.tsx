@@ -12,6 +12,9 @@ import { OrganizerEventsListPage } from './features/events/pages/OrganizerEvents
 import { EventDetailPage } from './features/catalog-browse/pages/EventDetailPage'
 import { EventsListPage } from './features/catalog-browse/pages/EventsListPage'
 import { GateValidatePage } from './features/gate/pages/GateValidatePage'
+import { CheckoutPage } from './features/reservations/pages/CheckoutPage'
+import { MyTicketsPage } from './features/tickets/pages/MyTicketsPage'
+import { SharedTicketPage } from './features/tickets/pages/SharedTicketPage'
 import { AuthenticatedLayout } from './shared/components/AuthenticatedLayout'
 
 function RootRedirect() {
@@ -34,9 +37,15 @@ function AppRoutes() {
       <Route element={<AuthenticatedLayout />}>
         <Route path="/events" element={<EventsListPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
+        <Route path="/tickets/share/:qrToken" element={<SharedTicketPage />} />
 
         <Route element={<RequireAuth />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
+
+        <Route element={<RequireAuth allowedRoles={['CLIENTE']} />}>
+          <Route path="/reservations/:id" element={<CheckoutPage />} />
+          <Route path="/tickets" element={<MyTicketsPage />} />
         </Route>
 
         <Route element={<RequireAuth allowedRoles={['ORGANIZADOR']} />}>

@@ -10,6 +10,7 @@ import { getEventDetailErrorMessage } from '../../events/utils/error-message'
 import { PageContainer } from '../../../shared/components/PageContainer'
 import { PerforatedDivider } from '../../../shared/components/PerforatedDivider'
 import { StatusBadge } from '../../../shared/components/StatusBadge'
+import { EventReservationSection } from '../../reservations/components/EventReservationSection'
 
 export function EventDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -138,15 +139,7 @@ export function EventDetailPage() {
               </div>
             </dl>
 
-            <div className="mt-6">
-              <button
-                type="button"
-                disabled
-                className="cursor-not-allowed bg-perf-grey px-4 py-2.5 font-body text-sm uppercase tracking-widest text-ink/60"
-              >
-                Reservar (em breve)
-              </button>
-            </div>
+            <EventReservationSection eventId={event.id} stock={event.stock} />
           </article>
         ) : null}
       </PageContainer>
